@@ -179,16 +179,12 @@ fn handle_readme(matches: &ArgMatches) -> Result<(), Box<dyn std::error::Error +
     let current_dir = env::current_dir()?;
     let readme_path = current_dir.join("README.md");
     let akshithio_dir = current_dir.join("akshithio");
+    let month = Utc::now().format("%b").to_string().to_lowercase();
+    let year = Utc::now().format("%Y");
 
     let caption = if let Some(custom_caption) = matches.get_one::<String>("caption") {
-        let now = Utc::now();
-        let month = now.format("%b").to_string().to_lowercase();
-        let year = now.format("%Y");
         format!("{} - {}", custom_caption, format!("{} {}", month, year))
     } else {
-        let now = Utc::now();
-        let month = now.format("%b").to_string().to_lowercase();
-        let year = now.format("%Y");
         format!("hello world! - {} {}", month, year)
     };
 
