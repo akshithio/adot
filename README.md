@@ -9,4 +9,4 @@
 
 <br />
 
-&nbsp;<img src="./akshithio/light-logo.png#gh-dark-mode-only" alt="Logo of Boilerexams" width ="24px" align = "left" /><img src="./akshithio/dark-logo.png#gh-light-mode-only" alt="Logo of Boilerexams" width ="24px" align = "left" /> like kdot but not. - akshithio - feb 2025 
+&nbsp;<img src="./akshithio/light-logo.png#gh-dark-mode-only" alt="Akshith Garapati's Personal Icon - Doodle of Two Eyes Dark Mode" width ="24px" align = "left" /><img src="./akshithio/dark-logo.png#gh-light-mode-only" alt="Akshith Garapati's Personal Icon - Doodle of Two Eyes Dark Mode" width ="24px" align = "left" /> like kdot but not. - akshithio - feb 2025 
