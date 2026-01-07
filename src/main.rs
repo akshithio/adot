@@ -272,17 +272,15 @@ async fn handle_link(matches: &ArgMatches) -> Result<(), Box<dyn std::error::Err
         created_at: timestamp,
     };
 
-    let object_returned: LinkStruct = db
-        .fluent()
+    db.fluent()
         .insert()
         .into(COLLECTION_NAME)
         .document_id(name)
         .object(&link_struct)
-        .execute()
+        .execute::<LinkStruct>()
         .await?;
 
     println!("✅ Created link: links.akshith.io/{} → {}", name, url);
-    println!("   {:?}", object_returned);
 
     Ok(())
 }
