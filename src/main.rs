@@ -29,6 +29,13 @@ struct LocationStruct {
     time: TimeStruct,
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+struct LinkStruct {
+    name: String,
+    url: String,
+    created_at: String,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let matches = Command::new("adot")
@@ -49,6 +56,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .about("Add custom footer to README.md file")
                 .arg(arg!(-c --caption <CAPTION> "Custom caption text (defaults to 'hello world! - month year')")),
         )
+        .subcommand(
+            Command::new("link")
+                .about("Create a short link that redirects to a URL")
+                .arg(arg!([name] "The short name for the link").required(true))
+                .arg(arg!([url] "The URL to redirect to").required(true)),
+        )
         .get_matches();
 
     if let Some(sub_matches) = matches.subcommand_matches("microblog") {
@@ -57,8 +70,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         handle_location().await?;
     } else if let Some(sub_matches) = matches.subcommand_matches("readme") {
         handle_readme(sub_matches)?;
+    } else if let Some(sub_matches) = matches.subcommand_matches("link") {
+        handle_link(sub_matches).await?;
     } else {
-        println!("No valid subcommand provided. Use `adot microblog 'your content'`, `adot location`, or `adot readme`.");
+        println!("No valid subcommand provided. Use `adot microblog 'your content'`, `adot location`, `adot readme`, or `adot link <name> <url>`.");
     }
     Ok(())
 }
@@ -230,6 +245,44 @@ fn handle_readme(matches: &ArgMatches) -> Result<(), Box<dyn std::error::Error +
         fs::write(&readme_path, content)?;
         println!("✅ Created new README.md with footer");
     }
+
+    Ok(())
+}
+
+async fn handle_link(matches: &ArgMatches) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let name = matches.get_one::<String>("name").unwrap();
+    let url = matches.get_one::<String>("url").unwrap();
+
+    let timestamp = Utc::now().to_rfc3339();
+
+    let project_id = env::var("PROJECT_ID").map_err(|e| format!("PROJECT_ID not found: {}", e))?;
+    let google_credentials = env::var("GOOGLE_APPLICATION_CREDENTIALS")
+        .map_err(|e| format!("GOOGLE_APPLICATION_CREDENTIALS not found: {}", e))?;
+
+    unsafe {
+        std::env::set_var("GOOGLE_APPLICATION_CREDENTIALS", google_credentials);
+    }
+
+    let db = FirestoreDb::new(&project_id).await?;
+    const COLLECTION_NAME: &str = "links";
+
+    let link_struct = LinkStruct {
+        name: name.to_string(),
+        url: url.to_string(),
+        created_at: timestamp,
+    };
+
+    let object_returned: LinkStruct = db
+        .fluent()
+        .insert()
+        .into(COLLECTION_NAME)
+        .document_id(name)
+        .object(&link_struct)
+        .execute()
+        .await?;
+
+    println!("✅ Created link: links.akshith.io/{} → {}", name, url);
+    println!("   {:?}", object_returned);
 
     Ok(())
 }
